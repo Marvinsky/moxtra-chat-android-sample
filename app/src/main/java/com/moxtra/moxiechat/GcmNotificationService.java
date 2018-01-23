@@ -26,6 +26,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.moxtra.moxiechat.chatlist.ChatListActivity;
 import com.moxtra.sdk.ChatClient;
 import com.moxtra.sdk.notification.NotificationManager;
 

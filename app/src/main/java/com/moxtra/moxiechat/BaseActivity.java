@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.moxtra.moxiechat.common.PreferenceUtil;
+import com.moxtra.moxiechat.login.LoginActivity;
 import com.moxtra.sdk.ChatClient;
 import com.moxtra.sdk.common.ApiCallback;
 import com.moxtra.sdk.common.ContextWrapper;

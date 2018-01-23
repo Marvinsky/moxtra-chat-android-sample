@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.moxtra.moxiechat.chatlist.ChatListActivity;
 import com.moxtra.sdk.ChatClient;
 import com.moxtra.sdk.notification.BasePushIntentService;
 import com.moxtra.sdk.notification.NotificationManager;
