@@ -2,6 +2,8 @@ package com.moxtra.moxiechat.chatlist.mvp;
 
 import com.moxtra.moxiechat.interfaces.ChatListView;
 import com.moxtra.moxiechat.model.Session;
+import com.moxtra.sdk.chat.model.Chat;
+import com.moxtra.sdk.meet.model.Meet;
 
 import java.util.List;
 
@@ -20,15 +22,26 @@ public class ChatListPresenterImpl implements ChatListPresenter, ChatListTaskLis
     }
 
     @Override
-    public void loadChatList() {
+    public void loadChatMeetList() {
         if (chatListView != null) {
             chatListView.showLoading();
         }
         chatListInterator.getChatList();
+        chatListInterator.getMeetList();
     }
 
     @Override
-    public void onChatListLoaded(List<Session> sessions) {
-        chatListView.showChatList(sessions);
+    public void onChatListLoaded(List<Chat> chats) {
+        chatListView.updateChats(chats);
+    }
+
+    @Override
+    public void onMeetListLoaded(List<Meet> meets) {
+        chatListView.updateMeets(meets);
+    }
+
+    @Override
+    public void fetchMeetsError(String errorCode, String errorMsg) {
+        chatListView.fetchMeetsError(errorCode, errorMsg);
     }
 }

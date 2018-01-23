@@ -19,6 +19,7 @@ import com.moxtra.moxiechat.model.Session;
 import com.moxtra.moxiechat.chatlist.mvp.ChatListPresenterImpl;
 import com.moxtra.sdk.ChatClient;
 import com.moxtra.sdk.chat.controller.ChatController;
+import com.moxtra.sdk.chat.model.Chat;
 import com.moxtra.sdk.chat.repo.ChatRepo;
 import com.moxtra.sdk.client.ChatClientDelegate;
 import com.moxtra.sdk.common.ApiCallback;
@@ -27,6 +28,8 @@ import com.moxtra.sdk.meet.model.Meet;
 import com.moxtra.sdk.meet.repo.MeetRepo;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ChatListActivity extends BaseActivity implements View.OnClickListener, ChatListView {
@@ -36,35 +39,21 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
     private FloatingActionButton mFloatingActionButton;
     private RecyclerView mRecyclerView;
     private ChatListAdapter mAdapter;
-    //private ChatListPresenterImpl chatListPresenter;
-
-
-    private final ApiCallback<List<Meet>> mMeetListApiCallback = new ApiCallback<List<Meet>>() {
-        @Override
-        public void onCompleted(List<Meet> meets) {
-            Log.d(TAG, "FetchMeets: onCompleted");
-            setLoading(false);
-            mAdapter.updateMeets(meets);
-        }
-
-        @Override
-        public void onError(int errorCode, String errorMsg) {
-            Log.d(TAG, "FetchMeets: onError");
-        }
-    };
+    private ChatListPresenterImpl chatListPresenter;
 
     private RecyclerView.LayoutManager mLayoutManager;
     private List<MoxieUser> mMoxieUserList;
-    List<Session> sessionList;
+
     private MyProfile mMyProfile;
     private ChatClientDelegate mChatClientDelegate;
     private ChatRepo mChatRepo;
     private MeetRepo mMeetRepo;
-    private ChatController mChatController;
+    List<Session> sessionList;
+    List<Chat> chatList;
+    List<Meet> meetList;
 
-    /*private static boolean isEnded(Meet meet) {
-        return !meet.isInProgress() && !(meet.getScheduleStartTime() > 0 && System.currentTimeMillis() < meet.getScheduleEndTime());
-    }*/
+
+    private ChatController mChatController;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +62,7 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
         Log.d(TAG, "onCreate!");
 
         sessionList = new ArrayList<>();
-        //chatListPresenter = new ChatListPresenterImpl(this);
+        chatListPresenter = new ChatListPresenterImpl(this);
         initializeView();
 
         //Initialize with ChatClient
@@ -87,8 +76,9 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
 
         mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, mChatClientDelegate, sessionList);
         mRecyclerView.setAdapter(mAdapter);
+        showLoading();
+        chatListPresenter.loadChatMeetList();
 
-        //chatListPresenter.loadChatList();
     }
 
     private void initializeView() {
@@ -138,10 +128,52 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
     }
 
     @Override
-    public void showChatList(List<Session> sessions) {
+    public void updateChats(List<Chat> chats) {
+        this.chatList = chats;
+        refreshData();
+    }
+
+    @Override
+    public void updateMeets(List<Meet> meets) {
+        Log.d(TAG, "FetchMeets: onCompleted");
+        this.meetList = meets;
+        refreshData();
+    }
+
+    @Override
+    public void fetchMeetsError(String errorCode, String errorMsg) {
+        Log.d(TAG, "FetchMeets: onError - errorCode=" + errorCode + ", errorMsg="+ errorMsg);
+    }
+
+    public void refreshData() {
         sessionList.clear();
-        sessionList.addAll(sessions);
-        hideLoading();
+        if (sessionList != null) {
+            for (Chat chat : chatList) {
+                sessionList.add(new Session(chat));
+            }
+        }
+        if (meetList != null) {
+            for (Meet meet : meetList) {
+                if (!isEnded(meet)) {
+                    sessionList.add(new Session(meet));
+                }
+            }
+        }
+        sortData();
+        mAdapter.notifyDataSetChanged();
+    }
+
+    private void sortData() {
+        Collections.sort(sessionList, new Comparator<Session>() {
+            @Override
+            public int compare(Session lhs, Session rhs) {
+                if (lhs.isMeet()) return -1;
+                if (rhs.isMeet()) return 1;
+                if (lhs.getChat().getLastFeedTimeStamp() > rhs.getChat().getLastFeedTimeStamp())
+                    return -1;
+                return 0;
+            }
+        });
     }
 
     @Override
@@ -161,5 +193,9 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
             users.add(user.firstName + " " + user.lastName);
         }
         return users;
+    }
+
+    private static boolean isEnded(Meet meet) {
+        return !meet.isInProgress() && !(meet.getScheduleStartTime() > 0 && System.currentTimeMillis() < meet.getScheduleEndTime());
     }
 }

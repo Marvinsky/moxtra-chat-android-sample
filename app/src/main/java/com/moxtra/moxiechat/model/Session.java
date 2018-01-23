@@ -9,10 +9,10 @@ import com.moxtra.sdk.meet.model.Meet;
 
 public class Session {
     public final boolean isMeet;
-    public Chat chat;
+    public com.moxtra.sdk.chat.model.Chat chat;
     public Meet meet;
 
-    public Session(Chat chat) {
+    public Session(com.moxtra.sdk.chat.model.Chat chat) {
         this.chat = chat;
         this.isMeet = false;
     }
@@ -26,11 +26,11 @@ public class Session {
         return isMeet;
     }
 
-    public Chat getChat() {
+    public com.moxtra.sdk.chat.model.Chat getChat() {
         return chat;
     }
 
-    public void setChat(Chat chat) {
+    public void setChat(com.moxtra.sdk.chat.model.Chat chat) {
         this.chat = chat;
     }
 

@@ -5,5 +5,6 @@ package com.moxtra.moxiechat.chatlist.mvp;
  */
 
 public interface ChatListPresenter {
-    void loadChatList();
+    void loadChatMeetList();
+
 }

@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 
 import com.moxtra.sdk.ChatClient;
+import com.moxtra.sdk.chat.controller.ChatConfig;
 import com.moxtra.sdk.chat.controller.ChatController;
 import com.moxtra.sdk.chat.model.Chat;
 import com.moxtra.sdk.chat.repo.ChatRepo;

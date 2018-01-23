@@ -51,7 +51,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
     private ChatClientDelegate mChatClientDelegate;
 
     private List<Session> mSessionList;
-    List<Chat> chatList;
+    List<com.moxtra.sdk.chat.model.Chat> chatList;
     List<Meet> meetList;
 
     private final ApiCallback<List<Meet>> mMeetListApiCallback = new ApiCallback<List<Meet>>() {
@@ -67,35 +67,35 @@ public class ChatListAdapter extends RecyclerView.Adapter {
         }
     };
 
-    public ChatListAdapter(Context context, MyProfile profile, ChatClientDelegate delegate, List<Session> sessions) {
+    public ChatListAdapter(Context context, MyProfile profile, ChatClientDelegate delegate, List<Session> chats) {
         super();
 
         this.mContext = context;
         this.mMyProfile = profile;
         this.mChatClientDelegate = delegate;
-        this.mSessionList = sessions;
+        this.mSessionList = chats;
 
         mChatRepo = mChatClientDelegate.createChatRepo();
         mMeetRepo = mChatClientDelegate.createMeetRepo();
 
-        mChatRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<Chat>() {
+        mChatRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<com.moxtra.sdk.chat.model.Chat>() {
             @Override
-            public void onCreated(List<Chat> items) {
-                Log.d(TAG, "Chat: onCreated");
+            public void onCreated(List<com.moxtra.sdk.chat.model.Chat> items) {
+                Log.d(TAG, "Session: onCreated");
                 //setLoading(false);
                 updateChats(mChatRepo.getList());
             }
 
             @Override
-            public void onUpdated(List<Chat> items) {
-                Log.d(TAG, "Chat: onUpdated");
+            public void onUpdated(List<com.moxtra.sdk.chat.model.Chat> items) {
+                Log.d(TAG, "Session: onUpdated");
                 //setLoading(false);
                 updateChats(mChatRepo.getList());
             }
 
             @Override
-            public void onDeleted(List<Chat> items) {
-                Log.d(TAG, "Chat: onDeleted");
+            public void onDeleted(List<com.moxtra.sdk.chat.model.Chat> items) {
+                Log.d(TAG, "Session: onDeleted");
                 //setLoading(false);
                 updateChats(mChatRepo.getList());
             }
@@ -128,16 +128,16 @@ public class ChatListAdapter extends RecyclerView.Adapter {
 
     }
 
-    private void leaveOrDeleteChat(Chat chat) {
+    private void leaveOrDeleteChat(com.moxtra.sdk.chat.model.Chat chat) {
         mChatRepo.deleteOrLeaveChat(chat, new ApiCallback<Void>() {
             @Override
             public void onCompleted(Void result) {
-                Log.i(TAG, "Leave or delete chat successfully.");
+                Log.i(TAG, "Leave or delete session successfully.");
             }
 
             @Override
             public void onError(int errorCode, String errorMsg) {
-                Log.e(TAG, "Failed to leave or delete chat, errorCode=" + errorCode + ", errorMsg=" + errorMsg);
+                Log.e(TAG, "Failed to leave or delete session, errorCode=" + errorCode + ", errorMsg=" + errorMsg);
             }
         });
     }
@@ -228,11 +228,11 @@ public class ChatListAdapter extends RecyclerView.Adapter {
             theHolder.btnDelete.setVisibility(View.GONE);
             theHolder.tvBadge.setVisibility(View.INVISIBLE);
         } else {
-            final Chat chat = session.chat;
+            final com.moxtra.sdk.chat.model.Chat chat = session.chat;
             chat.fetchCover(new ApiCallback<String>() {
                 @Override
                 public void onCompleted(final String avatarPath) {
-                    Log.d(TAG, " Chat cover=" + avatarPath);
+                    Log.d(TAG, " Session cover=" + avatarPath);
                     if (!TextUtils.isEmpty(avatarPath)) {
                         theHolder.ivCover.setImageURI(Uri.fromFile(new File(avatarPath)));
                     } else {

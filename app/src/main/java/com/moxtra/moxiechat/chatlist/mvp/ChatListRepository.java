@@ -1,5 +1,10 @@
 package com.moxtra.moxiechat.chatlist.mvp;
 
+import com.moxtra.sdk.common.ApiCallback;
+import com.moxtra.sdk.meet.model.Meet;
+
+import java.util.List;
+
 /**
  * @author Marvin Abisrror
  */
@@ -7,5 +12,6 @@ package com.moxtra.moxiechat.chatlist.mvp;
 public interface ChatListRepository {
 
     void getChatList();
+    ApiCallback<List<Meet>> getMeetList();
 
 }
