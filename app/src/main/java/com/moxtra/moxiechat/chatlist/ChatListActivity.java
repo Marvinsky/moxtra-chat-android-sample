@@ -10,9 +10,11 @@ import com.afollestad.materialdialogs.MaterialDialog;
 import com.melnykov.fab.FloatingActionButton;
 import com.moxtra.moxiechat.BaseActivity;
 import com.moxtra.moxiechat.ChatActivity;
+import com.moxtra.moxiechat.MeetActivity;
 import com.moxtra.moxiechat.R;
 import com.moxtra.moxiechat.chatlist.adapter.ChatListAdapter;
 import com.moxtra.moxiechat.interfaces.ChatListView;
+import com.moxtra.moxiechat.listener.OnChatListListener;
 import com.moxtra.moxiechat.model.DummyData;
 import com.moxtra.moxiechat.model.MoxieUser;
 import com.moxtra.moxiechat.model.Session;
@@ -25,6 +27,7 @@ import com.moxtra.sdk.client.ChatClientDelegate;
 import com.moxtra.sdk.common.ApiCallback;
 import com.moxtra.sdk.common.BaseRepo;
 import com.moxtra.sdk.common.model.MyProfile;
+import com.moxtra.sdk.common.model.User;
 import com.moxtra.sdk.meet.model.Meet;
 import com.moxtra.sdk.meet.repo.MeetRepo;
 
@@ -33,7 +36,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class ChatListActivity extends BaseActivity implements View.OnClickListener, ChatListView {
+public class ChatListActivity extends BaseActivity implements View.OnClickListener, ChatListView, OnChatListListener {
 
     private static final String TAG = "DEMO_ChatList";
 
@@ -75,9 +78,8 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
             return;
         }
 
-        mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, sessionList);
+        mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, sessionList, this);
         mRecyclerView.setAdapter(mAdapter);
-        showLoading();
         handlers();
         chatListPresenter.loadChatMeetList();
 
@@ -226,7 +228,13 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
         setLoading(false);
     }
 
-    private void leaveOrDeleteChat(Chat chat) {
+    @Override
+    public void showChat(Chat chat) {
+        ChatActivity.showChat(this, chat);
+    }
+
+    @Override
+    public void leaveOrDeleteChat(Chat chat) {
         mChatRepo.deleteOrLeaveChat(chat, new ApiCallback<Void>() {
             @Override
             public void onCompleted(Void result) {
@@ -240,7 +248,15 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
         });
     }
 
+    @Override
+    public void joinMeet(Meet meet) {
+        MeetActivity.joinMeet(this, meet);
+    }
 
+    @Override
+    public void startMeet(String topic, ArrayList<User> userList) {
+        MeetActivity.startMeet(this, topic, userList);
+    }
 
     private List<String> getUserList() {
         mMoxieUserList = DummyData.getUserListForSelect(DummyData.findByUniqueId(mMyProfile.getUniqueId()));

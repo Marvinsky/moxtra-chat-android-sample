@@ -12,7 +12,6 @@ import java.util.List;
  */
 
 public interface ChatListTaskListener {
-    void onChatListLoaded(List<Chat> chat);
     void onMeetListLoaded(List<Meet> meets);
     void fetchMeetsError(String errorCode, String errorMsg);
     void fetchMeets(ApiCallback<List<Meet>> listApiCallback);

@@ -17,24 +17,17 @@ import android.widget.TextView;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.moxtra.moxiechat.ChatActivity;
-import com.moxtra.moxiechat.MeetActivity;
 import com.moxtra.moxiechat.R;
+import com.moxtra.moxiechat.listener.OnChatListListener;
 import com.moxtra.moxiechat.model.Session;
 import com.moxtra.sdk.chat.model.Chat;
-import com.moxtra.sdk.chat.repo.ChatRepo;
-import com.moxtra.sdk.client.ChatClientDelegate;
 import com.moxtra.sdk.common.ApiCallback;
-import com.moxtra.sdk.common.BaseRepo;
 import com.moxtra.sdk.common.model.MyProfile;
 import com.moxtra.sdk.common.model.User;
 import com.moxtra.sdk.meet.model.Meet;
-import com.moxtra.sdk.meet.repo.MeetRepo;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -48,15 +41,14 @@ public class ChatListAdapter extends RecyclerView.Adapter {
     private MyProfile mMyProfile;
 
     private List<Session> mSessionList;
-    List<Chat> chatList;
-    List<Meet> meetList;
-
-    public ChatListAdapter(Context context, MyProfile profile, List<Session> chats) {
+    private OnChatListListener listener;
+    public ChatListAdapter(Context context, MyProfile profile, List<Session> chats, OnChatListListener onChatListListener) {
         super();
 
         this.mContext = context;
         this.mMyProfile = profile;
         this.mSessionList = chats;
+        this.listener = onChatListListener;
 
     }
 
@@ -86,7 +78,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
                 theHolder.btnMeet.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        MeetActivity.joinMeet(mContext, meet);
+                        listener.joinMeet(meet);
                     }
                 });
             }
@@ -122,7 +114,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
                     ArrayList<User> userList = new ArrayList<>();
                     userList.addAll(chat.getMembers());
                     String topic = mMyProfile.getFirstName() + "'s " + "meet";
-                    MeetActivity.startMeet(mContext, topic, userList);
+                    listener.startMeet(topic, userList);
                 }
             });
             if (mMyProfile.getUniqueId().equals(chat.getOwner().getUniqueId())) {
@@ -144,7 +136,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    //leaveOrDeleteChat(chat);
+                                    listener.leaveOrDeleteChat(chat);
                                     dialog.dismiss();
                                 }
                             })
@@ -192,9 +184,9 @@ public class ChatListAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View v) {
                     if (session.isMeet) {
-                        MeetActivity.joinMeet(mContext, session.meet);
+                        listener.joinMeet(session.meet);
                     } else {
-                        ChatActivity.showChat(mContext, session.chat);
+                        listener.showChat(session.chat);
                     }
                 }
             });

@@ -11,7 +11,6 @@ import java.util.List;
 
 public interface ChatListRepository {
 
-    void getChatList();
     void getMeetList();
 
 }

@@ -5,6 +5,5 @@ package com.moxtra.moxiechat.chatlist.mvp;
  */
 
 public interface ChatListInterator {
-    void getChatList();
     void getMeetList();
 }

@@ -14,11 +14,6 @@ public class ChatListInteratorImpl implements ChatListInterator {
     }
 
     @Override
-    public void getChatList() {
-        chatListRepository.getChatList();
-    }
-
-    @Override
     public void getMeetList() {
         chatListRepository.getMeetList();
     }

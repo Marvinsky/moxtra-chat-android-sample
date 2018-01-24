@@ -14,17 +14,10 @@ import java.util.List;
 public class ChatListRepositoryImpl implements ChatListRepository {
     ChatListTaskListener chatListTaskListener;
 
-
-
     private ApiCallback<List<Meet>> mMeetListApiCallback = null;
 
     public ChatListRepositoryImpl(ChatListTaskListener listener) {
         this.chatListTaskListener = listener;
-    }
-
-    @Override
-    public void getChatList() {
-
     }
 
     @Override

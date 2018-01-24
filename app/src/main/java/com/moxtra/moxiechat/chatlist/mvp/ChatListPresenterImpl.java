@@ -27,13 +27,7 @@ public class ChatListPresenterImpl implements ChatListPresenter, ChatListTaskLis
         if (chatListView != null) {
             chatListView.showLoading();
         }
-        //chatListInterator.getChatList();
         chatListInterator.getMeetList();
-    }
-
-    @Override
-    public void onChatListLoaded(List<Chat> chats) {
-        //chatListView.updateChats(chats);
     }
 
     @Override
@@ -49,5 +43,6 @@ public class ChatListPresenterImpl implements ChatListPresenter, ChatListTaskLis
     @Override
     public void fetchMeets(ApiCallback<List<Meet>> listApiCallback) {
         chatListView.fetchMeets(listApiCallback);
+        chatListView.hideLoading();
     }
 }
