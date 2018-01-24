@@ -46,153 +46,18 @@ public class ChatListAdapter extends RecyclerView.Adapter {
     private static final String TAG = "DEMO_ChatList";
     private Context mContext;
     private MyProfile mMyProfile;
-    private ChatRepo mChatRepo;
-    private MeetRepo mMeetRepo;
-    private ChatClientDelegate mChatClientDelegate;
 
     private List<Session> mSessionList;
-    List<com.moxtra.sdk.chat.model.Chat> chatList;
+    List<Chat> chatList;
     List<Meet> meetList;
-
-    private final ApiCallback<List<Meet>> mMeetListApiCallback = new ApiCallback<List<Meet>>() {
-        @Override
-        public void onCompleted(List<Meet> meets) {
-            Log.d(TAG, "FetchMeets: onCompleted");
-            updateMeets(meets);
-        }
-
-        @Override
-        public void onError(int errorCode, String errorMsg) {
-            Log.d(TAG, "FetchMeets: onError");
-        }
-    };
 
     public ChatListAdapter(Context context, MyProfile profile, ChatClientDelegate delegate, List<Session> chats) {
         super();
 
         this.mContext = context;
         this.mMyProfile = profile;
-        this.mChatClientDelegate = delegate;
         this.mSessionList = chats;
 
-        mChatRepo = mChatClientDelegate.createChatRepo();
-        mMeetRepo = mChatClientDelegate.createMeetRepo();
-
-        mChatRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<com.moxtra.sdk.chat.model.Chat>() {
-            @Override
-            public void onCreated(List<com.moxtra.sdk.chat.model.Chat> items) {
-                Log.d(TAG, "Session: onCreated");
-                //setLoading(false);
-                updateChats(mChatRepo.getList());
-            }
-
-            @Override
-            public void onUpdated(List<com.moxtra.sdk.chat.model.Chat> items) {
-                Log.d(TAG, "Session: onUpdated");
-                //setLoading(false);
-                updateChats(mChatRepo.getList());
-            }
-
-            @Override
-            public void onDeleted(List<com.moxtra.sdk.chat.model.Chat> items) {
-                Log.d(TAG, "Session: onDeleted");
-                //setLoading(false);
-                updateChats(mChatRepo.getList());
-            }
-        });
-
-        mMeetRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<Meet>() {
-            @Override
-            public void onCreated(List<Meet> items) {
-                Log.d(TAG, "Meet: onCreated");
-                mMeetRepo.fetchMeets(mMeetListApiCallback);
-            }
-
-            @Override
-            public void onUpdated(List<Meet> items) {
-                Log.d(TAG, "Meet: onUpdated");
-                mMeetRepo.fetchMeets(mMeetListApiCallback);
-            }
-
-            @Override
-            public void onDeleted(List<Meet> items) {
-                Log.d(TAG, "Meet: onDeleted");
-                mMeetRepo.fetchMeets(mMeetListApiCallback);
-            }
-        });
-
-        //setLoading(true);
-        updateChats(mChatRepo.getList());
-        //setLoading(false);
-        mMeetRepo.fetchMeets(mMeetListApiCallback);
-
-    }
-
-    private void leaveOrDeleteChat(com.moxtra.sdk.chat.model.Chat chat) {
-        mChatRepo.deleteOrLeaveChat(chat, new ApiCallback<Void>() {
-            @Override
-            public void onCompleted(Void result) {
-                Log.i(TAG, "Leave or delete session successfully.");
-            }
-
-            @Override
-            public void onError(int errorCode, String errorMsg) {
-                Log.e(TAG, "Failed to leave or delete session, errorCode=" + errorCode + ", errorMsg=" + errorMsg);
-            }
-        });
-    }
-
-    private void sortData() {
-        Collections.sort(mSessionList, new Comparator<Session>() {
-            @Override
-            public int compare(Session lhs, Session rhs) {
-                if (lhs.isMeet()) return -1;
-                if (rhs.isMeet()) return 1;
-                if (lhs.getChat().getLastFeedTimeStamp() > rhs.getChat().getLastFeedTimeStamp())
-                    return -1;
-                return 0;
-            }
-        });
-    }
-
-
-    public void updateChats(List<Chat> chats) {
-        this.chatList = chats;
-        refreshData();
-    }
-
-    public void updateMeets(List<Meet> meets) {
-        this.meetList = meets;
-        refreshData();
-    }
-
-    public void refreshData() {
-        //setLoading(false);
-        mSessionList.clear();
-        if (chatList != null) {
-            for (Chat chat : chatList) {
-                mSessionList.add(new Session(chat));
-            }
-        }
-        if (meetList != null) {
-            for (Meet meet : meetList) {
-                if (!isEnded(meet)) {
-                    mSessionList.add(new Session(meet));
-                }
-            }
-        }
-        sortData();
-        notifyDataSetChanged();
-    }
-
-    public void cleanObjects() {
-        if (mMeetRepo != null) {
-            mMeetRepo.cleanup();
-        }
-
-        if (mChatRepo != null) {
-            mChatRepo.cleanup();
-        }
     }
 
     @Override
@@ -228,7 +93,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
             theHolder.btnDelete.setVisibility(View.GONE);
             theHolder.tvBadge.setVisibility(View.INVISIBLE);
         } else {
-            final com.moxtra.sdk.chat.model.Chat chat = session.chat;
+            final Chat chat = session.chat;
             chat.fetchCover(new ApiCallback<String>() {
                 @Override
                 public void onCompleted(final String avatarPath) {
@@ -279,7 +144,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
                             .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    leaveOrDeleteChat(chat);
+                                    //leaveOrDeleteChat(chat);
                                     dialog.dismiss();
                                 }
                             })

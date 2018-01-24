@@ -12,6 +12,6 @@ import java.util.List;
 public interface ChatListRepository {
 
     void getChatList();
-    ApiCallback<List<Meet>> getMeetList();
+    void getMeetList();
 
 }

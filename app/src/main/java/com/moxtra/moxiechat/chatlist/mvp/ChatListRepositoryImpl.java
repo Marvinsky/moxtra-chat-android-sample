@@ -20,10 +20,6 @@ public class ChatListRepositoryImpl implements ChatListRepository {
 
     public ChatListRepositoryImpl(ChatListTaskListener listener) {
         this.chatListTaskListener = listener;
-
-
-        //mChatRepo = mChatClientDelegate.createChatRepo();
-        //mMeetRepo = mChatClientDelegate.createMeetRepo();
     }
 
     @Override
@@ -32,8 +28,8 @@ public class ChatListRepositoryImpl implements ChatListRepository {
     }
 
     @Override
-    public ApiCallback<List<Meet>> getMeetList() {
-        return mMeetListApiCallback = new ApiCallback<List<Meet>>() {
+    public void getMeetList() {
+        mMeetListApiCallback = new ApiCallback<List<Meet>>() {
             @Override
             public void onCompleted(List<Meet> meets) {
                 chatListTaskListener.onMeetListLoaded(meets);
@@ -44,5 +40,6 @@ public class ChatListRepositoryImpl implements ChatListRepository {
                 chatListTaskListener.fetchMeetsError(String.valueOf(errorCode), errorMsg);
             }
         };
+        chatListTaskListener.fetchMeets(mMeetListApiCallback);
     }
 }

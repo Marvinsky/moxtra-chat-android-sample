@@ -23,6 +23,7 @@ import com.moxtra.sdk.chat.model.Chat;
 import com.moxtra.sdk.chat.repo.ChatRepo;
 import com.moxtra.sdk.client.ChatClientDelegate;
 import com.moxtra.sdk.common.ApiCallback;
+import com.moxtra.sdk.common.BaseRepo;
 import com.moxtra.sdk.common.model.MyProfile;
 import com.moxtra.sdk.meet.model.Meet;
 import com.moxtra.sdk.meet.repo.MeetRepo;
@@ -77,8 +78,36 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
         mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, mChatClientDelegate, sessionList);
         mRecyclerView.setAdapter(mAdapter);
         showLoading();
+        handlers();
         chatListPresenter.loadChatMeetList();
 
+    }
+
+    private void handlers() {
+        mChatRepo = mChatClientDelegate.createChatRepo();
+        mMeetRepo = mChatClientDelegate.createMeetRepo();
+
+        mChatRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<Chat>() {
+            @Override
+            public void onCreated(List<Chat> items) {
+                Log.d(TAG, "Chat: onCreated");
+                updateChats(mChatRepo.getList());
+            }
+
+            @Override
+            public void onUpdated(List<Chat> items) {
+                Log.d(TAG, "Chat: onUpdated");
+                updateChats(mChatRepo.getList());
+            }
+
+            @Override
+            public void onDeleted(List<Chat> items) {
+                Log.d(TAG, "Chat: onDeleted");
+                updateChats(mChatRepo.getList());
+            }
+        });
+
+        updateChats(mChatRepo.getList());
     }
 
     private void initializeView() {
@@ -95,7 +124,7 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
     @Override
     protected void onResume() {
         super.onResume();
-        mAdapter.refreshData();
+        refreshData();
     }
 
     @Override
@@ -105,25 +134,13 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
             mChatController.cleanup();
             mChatController = null;
         }
-        mAdapter.cleanObjects();
-    }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.fab) {
-            new MaterialDialog.Builder(this)
-                    .title(R.string.selectUserTitle)
-                    .items(getUserList())
-                    .itemsCallback(new MaterialDialog.ListCallback() {
-                        @Override
-                        public void onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
-                            ArrayList<String> uniqueIdList = new ArrayList<>();
-                            uniqueIdList.add(mMoxieUserList.get(i).uniqueId);
-                            String topic = mMyProfile.getFirstName() + "'s chat";
-                            ChatActivity.startGroupChat(ChatListActivity.this, topic, uniqueIdList);
-                        }
-                    })
-                    .show();
+        if (mMeetRepo != null) {
+            mMeetRepo.cleanup();
+        }
+
+        if (mChatRepo != null) {
+            mChatRepo.cleanup();
         }
     }
 
@@ -143,6 +160,29 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
     @Override
     public void fetchMeetsError(String errorCode, String errorMsg) {
         Log.d(TAG, "FetchMeets: onError - errorCode=" + errorCode + ", errorMsg="+ errorMsg);
+    }
+
+    @Override
+    public void fetchMeets(final ApiCallback<List<Meet>> mMeetListApiCallback) {
+        mMeetRepo.setOnChangedListener(new BaseRepo.OnRepoChangedListener<Meet>() {
+            @Override
+            public void onCreated(List<Meet> items) {
+                Log.d(TAG, "Meet: onCreated");
+                mMeetRepo.fetchMeets(mMeetListApiCallback);
+            }
+
+            @Override
+            public void onUpdated(List<Meet> items) {
+                Log.d(TAG, "Meet: onUpdated");
+                mMeetRepo.fetchMeets(mMeetListApiCallback);
+            }
+
+            @Override
+            public void onDeleted(List<Meet> items) {
+                Log.d(TAG, "Meet: onDeleted");
+                mMeetRepo.fetchMeets(mMeetListApiCallback);
+            }
+        });
     }
 
     public void refreshData() {
@@ -186,6 +226,22 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
         setLoading(false);
     }
 
+    private void leaveOrDeleteChat(Chat chat) {
+        mChatRepo.deleteOrLeaveChat(chat, new ApiCallback<Void>() {
+            @Override
+            public void onCompleted(Void result) {
+                Log.i(TAG, "Leave or delete session successfully.");
+            }
+
+            @Override
+            public void onError(int errorCode, String errorMsg) {
+                Log.e(TAG, "Failed to leave or delete session, errorCode=" + errorCode + ", errorMsg=" + errorMsg);
+            }
+        });
+    }
+
+
+
     private List<String> getUserList() {
         mMoxieUserList = DummyData.getUserListForSelect(DummyData.findByUniqueId(mMyProfile.getUniqueId()));
         List<String> users = new ArrayList<>(mMoxieUserList.size());
@@ -197,5 +253,24 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
 
     private static boolean isEnded(Meet meet) {
         return !meet.isInProgress() && !(meet.getScheduleStartTime() > 0 && System.currentTimeMillis() < meet.getScheduleEndTime());
+    }
+
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.fab) {
+            new MaterialDialog.Builder(this)
+                    .title(R.string.selectUserTitle)
+                    .items(getUserList())
+                    .itemsCallback(new MaterialDialog.ListCallback() {
+                        @Override
+                        public void onSelection(MaterialDialog materialDialog, View view, int i, CharSequence charSequence) {
+                            ArrayList<String> uniqueIdList = new ArrayList<>();
+                            uniqueIdList.add(mMoxieUserList.get(i).uniqueId);
+                            String topic = mMyProfile.getFirstName() + "'s chat";
+                            ChatActivity.startGroupChat(ChatListActivity.this, topic, uniqueIdList);
+                        }
+                    })
+                    .show();
+        }
     }
 }
