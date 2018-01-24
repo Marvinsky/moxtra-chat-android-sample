@@ -51,7 +51,7 @@ public class ChatListAdapter extends RecyclerView.Adapter {
     List<Chat> chatList;
     List<Meet> meetList;
 
-    public ChatListAdapter(Context context, MyProfile profile, ChatClientDelegate delegate, List<Session> chats) {
+    public ChatListAdapter(Context context, MyProfile profile, List<Session> chats) {
         super();
 
         this.mContext = context;

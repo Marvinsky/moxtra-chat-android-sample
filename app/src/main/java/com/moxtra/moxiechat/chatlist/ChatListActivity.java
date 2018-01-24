@@ -75,7 +75,7 @@ public class ChatListActivity extends BaseActivity implements View.OnClickListen
             return;
         }
 
-        mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, mChatClientDelegate, sessionList);
+        mAdapter = new ChatListAdapter(ChatListActivity.this, mMyProfile, sessionList);
         mRecyclerView.setAdapter(mAdapter);
         showLoading();
         handlers();
